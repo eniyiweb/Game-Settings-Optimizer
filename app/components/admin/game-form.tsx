@@ -31,7 +31,7 @@ export function GameForm() {
     try {
       const { error } = await supabase
         .from('games')
-        .upsert([data], { onConflict: 'name' })
+        .upsert([data], { onConflict: 'id' })
 
       if (error) throw error
 
