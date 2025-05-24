@@ -79,7 +79,7 @@ export function GameForm() {
           <label className="block text-sm font-medium mb-1">Recommended Requirements</label>
           <textarea
             {...register('recommendedRequirements')}
-            className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 min-h-[100px]}
+            className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 min-h-[100px]"
             placeholder="Recommended hardware..."
           />
         </div>
