@@ -1,19 +1,31 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ChevronDown } from 'lucide-react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 export function GameSelector() {
   const [selectedGame, setSelectedGame] = useState<string | null>(null)
-  
-  // TODO: Replace with Supabase data
-  const games = [
-    { id: '1', name: 'Counter-Strike 2' },
-    { id: '2', name: 'Dota 2' },
-    { id: '3', name: 'Apex Legends' },
-    { id: '4', name: 'PUBG: Battlegrounds' },
-    { id: '5', name: 'Grand Theft Auto V' }
-  ]
+  const [games, setGames] = useState<{ id: string; name: string }[]>([])
+  const supabase = createClientComponentClient()
+
+  useEffect(() => {
+    const fetchGames = async () => {
+      const { data, error } = await supabase
+        .from('games')
+        .select('id, name')
+        .order('name', { ascending: true })
+
+      if (error) {
+        console.error('Error fetching games:', error)
+        return
+      }
+
+      setGames(data || [])
+    }
+
+    fetchGames()
+  }, [supabase])
 
   return (
     <div className="bg-gray-800 p-6 rounded-lg">
