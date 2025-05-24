@@ -3,6 +3,9 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useRouter } from 'next/navigation'
+import { toast } from 'react-hot-toast'
 
 const aiSchema = z.object({
   apiKey: z.string().min(1, 'API key is required'),
@@ -16,17 +19,30 @@ const aiSchema = z.object({
 type AISettingsFormData = z.infer<typeof aiSchema>
 
 export function AISettingsForm() {
+  const supabase = createClientComponentClient()
+  const router = useRouter()
   const {
     register,
     handleSubmit,
-    formState: { errors }
+    formState: { errors, isSubmitting }
   } = useForm<AISettingsFormData>({
     resolver: zodResolver(aiSchema)
   })
 
-  const onSubmit = (data: AISettingsFormData) => {
-    console.log('Submitted AI settings:', data)
-    // TODO: Connect to Supabase
+  const onSubmit = async (data: AISettingsFormData) => {
+    try {
+      const { error } = await supabase
+        .from('ai_settings')
+        .upsert([data], { onConflict: 'id' })
+
+      if (error) throw error
+
+      toast.success('AI settings saved successfully')
+      router.refresh()
+    } catch (error) {
+      toast.error('Failed to save AI settings')
+      console.error('Error saving AI settings:', error)
+    }
   }
 
   return (
@@ -130,9 +146,10 @@ Provide recommendations in this format:
         
         <button
           type="submit"
-          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition"
+          disabled={isSubmitting}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition disabled:opacity-50"
         >
-          Save AI Settings
+          {isSubmitting ? 'Saving...' : 'Save AI Settings'}
         </button>
       </form>
     </div>
